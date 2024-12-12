@@ -1,4 +1,4 @@
-package ejercicioDos;
+package ejercicioTres;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,15 +7,14 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Random;
 
-public class SocketClientNumerico {
+public class SocketClientAdivinanza {
 	private Socket socket;
 	private InputStream is;
 	private OutputStream os;
 	private String address;
 	private int port;
 
-	public SocketClientNumerico(String address, int port) {
-
+	public SocketClientAdivinanza(String address, int port) {
 		this.address = address;
 		this.port = port;
 	}
@@ -41,18 +40,40 @@ public class SocketClientNumerico {
 	}
 
 	public static void main(String[] args) {
-		SocketClientNumerico client = new SocketClientNumerico("localhost", 8081);
-
+		SocketClientAdivinanza client = new SocketClientAdivinanza("localhost", 8081);
+		int datoEnviado = (int) (Math.random() * 100);
+		int intentos = 0;
 		try {
 			client.start();
-			for (int i = 0; i < 255; i++) {
-				int datoAEnviar = i;
-				client.os.write(datoAEnviar);
-				System.out.printf("[Client] Enviado %d a %s:%d%n", datoAEnviar, client.address, client.port);
+
+			while (true) {
+				intentos++;
+				System.out.println("[Client]Introduce un número ");
+
+				client.os.write(datoEnviado);
+
 				int datoRecibido = client.is.read();
-				System.out.printf("[Client] Dato recibido %d de %s:%d%n", datoRecibido, client.address, client.port);
+
+				if (datoRecibido == 103) {
+					// numero enviado es mayor del que tengo que adivinar
+					System.out.println("[Client]Número mayor ");
+					datoEnviado--;
+
+				} else if (datoRecibido == 101) {
+					// numero enviado es menor del que tengo que adivinar
+					System.out.println("[Client]Número menor ");
+					datoRecibido++;
+
+				} else if (datoRecibido == 102) {
+					System.out.println("[Client]Número adivinado en el intento " + intentos);
+					break;
+				}
+				System.out.println(datoRecibido);
+				System.out.println(datoEnviado);
+
 			}
 			client.stop();
+
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
